@@ -1,0 +1,1 @@
+# satic-site-generator
