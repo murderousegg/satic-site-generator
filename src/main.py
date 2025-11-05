@@ -1,7 +1,7 @@
-from textnode import TextNode, TextType
 import os
 import shutil
 from markdown_to_blocks import markdown_to_html_node, extract_title
+import sys
 
 def clear_directory(path: str) -> None:
     """
@@ -40,12 +40,14 @@ def copy_recursive(src: str, dst: str) -> None:
             shutil.copy2(src_path, dst_path)
 
 
-def copy_static_to_public(static_dir: str = "static", public_dir: str = "public") -> None:
+def copy_static_to_public() -> None:
     """
     Clear the public directory, then recursively copy everything
     from static_dir into public_dir.
     """
     # Make sure destination directory exists, then clear its contents
+    public_dir = "public"
+    static_dir = "static"
     os.makedirs(public_dir, exist_ok=True)
     clear_directory(public_dir)
 
@@ -70,7 +72,7 @@ def generate_page(from_path, template_path, dest_path):
     with open(dest_path, "w") as f:
         f.write(template)
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path): 
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath): 
     template = ""
     with open(template_path) as f:
         template = f.read()
@@ -82,7 +84,7 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
         if os.path.isdir(entry_path):
             # Recurse into subdirectories
             os.makedirs(dest_path, exist_ok=True)
-            generate_pages_recursive(entry_path, template_path, dest_path)
+            generate_pages_recursive(entry_path, template_path, dest_path, basepath)
 
         elif entry.endswith(".md"):
             with open(entry_path, encoding="utf-8") as f:
@@ -93,6 +95,8 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
             title = extract_title(markdown)
             template = template.replace("{{ Title }}", title)
             template = template.replace("{{ Content }}", html)
+            template = template.replace("href=\"/", f"href=\"{basepath}")
+            template = template.replace("src=\"/", f"src=\"{basepath}")
 
             # Write to corresponding .html file in dest_dir_path
             html_name = os.path.splitext(entry)[0] + ".html"
@@ -103,13 +107,14 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
 
             print(f"Generated {output_path}")
 
-def main():
+def main(basepath):
     copy_static_to_public()
-    generate_pages_recursive("content/", "template.html", "public/")
+    generate_pages_recursive(f"content/", f"template.html", f"docs/", basepath)
 
     
 
 
 
 if __name__=="__main__":
-    main()
+    basepath = sys.argv[1]
+    main(basepath)
