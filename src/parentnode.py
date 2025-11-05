@@ -12,4 +12,8 @@ class ParentNode(HTMLNode):
         for child in self.children:
             child_tags+=child.to_html()
         end_tag = f"</{self.tag}>"
+        if self.tag == "img":
+            return f"<{self.tag} {self.props_to_html()} />"
+        if self.tag == "a":
+            return f"<{self.tag} href={self.props['url']}>{self.value}</{self.tag}>"
         return start_tag+child_tags+end_tag
