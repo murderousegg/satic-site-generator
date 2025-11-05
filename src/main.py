@@ -46,7 +46,7 @@ def copy_static_to_public() -> None:
     from static_dir into public_dir.
     """
     # Make sure destination directory exists, then clear its contents
-    public_dir = "public"
+    public_dir = "docs"
     static_dir = "static"
     os.makedirs(public_dir, exist_ok=True)
     clear_directory(public_dir)
